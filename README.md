@@ -35,5 +35,5 @@ Trade is entered at the start of a new candle
 
 //----Notes----//
 Trade is entered when a the previous candle closes and the new candle opens. Depending on your broker, the trading window is different from the candle opening time. This may cause an invalid trade entry when market is closed. A timer is added in the EA which can be adjust based on the difference in timing of candle open and trading Open.
-Trade can be entered immediately after a trade is exited
+Trade can be entered immediately after a trade is exited.
 doji candle is defined as a candle where the upper and lower wicks are greater than 1.2x ATR, while the distance between close and open price is within 20% of the distance between wicks. 
