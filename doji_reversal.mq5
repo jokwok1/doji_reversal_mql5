@@ -80,6 +80,8 @@ input double RsiOverbought = 70.0;   // Overbought levels for RSI
 input double RsiOversold   = 30.0;   // Oversold levels for RSI
 bool         C3_L_Check    = false;    
 bool         C3_S_Check    = false;  
+bool         C3_L_Exit    = false;    
+bool         C3_S_Exit    = false; 
 const string C3Name        = "RSI"; 
 
 //+------------------------------------------------------------------+
@@ -182,6 +184,27 @@ void OnTick()
       else 
          C2_S_Check = false;
          
+      //RSI Confirmation Check, if C2 Check is false
+      if (OpenSignalRsi == "Long" || C3_Check_Conf == false)
+         C3_L_Check = true; 
+      else 
+         C3_L_Check = false;
+      if (OpenSignalRsi == "Short" || C3_Check_Conf == false)
+         C3_S_Check = true;  
+      else 
+         C3_S_Check = false;
+         
+      // Exit code 
+      if (C3_Check_Conf == true && OpenSignalRsi == "Long Exit") 
+         C3_L_Exit = true;
+      else 
+         C3_L_Exit = false; 
+      if (C3_Check_Conf == true && OpenSignalRsi == "Short Exit") 
+         C3_S_Exit = true;
+      else 
+         C3_S_Exit = false;   
+      
+         
       //Check if any Long / Short Trades are open
       bool checkLong  = IsLongTradeOpen(); 
       bool checkShort = IsShortTradeOpen();   
@@ -197,15 +220,14 @@ void OnTick()
             Sleep(1000); // delay by 4 mins which give the trading open for daily TF
       }
       
-      // Closes Trade based on exit from MACD Crossing
-      if (OpenSignalMacd == "Short" && checkLong == true)
+      if (C3_L_Exit == true && checkLong == true)
          if (totalTrades == 2){
             ProcessTradeClose();
             ProcessTradeClose();
          }
          else if (totalTrades == 1)
-            ProcessTradeClose();
-      if (OpenSignalMacd == "Long" && checkShort == true)
+               ProcessTradeClose();
+      if (C3_S_Exit == true && checkShort == true)
          if (totalTrades == 2){
             ProcessTradeClose();
             ProcessTradeClose();
@@ -213,11 +235,12 @@ void OnTick()
          else if (totalTrades == 1)
             ProcessTradeClose(); 
       
-      totalTrades = CheckTrades(); //Call again to check no. of trades after closing
+      totalTrades = CheckTrades();
       
-      if(OpenSignalMacd == "Long" && C2_L_Check == true && totalTrades <= 0)
+      
+      if(OpenSignalDoji == "Doji" && C2_L_Check == true && C3_L_Check == true && totalTrades <= 0)
          LongEntry = true;
-      else if (OpenSignalMacd == "Short" && C2_S_Check == true && totalTrades <= 0)
+      else if (OpenSignalDoji == "Doji" && C2_S_Check == true && C3_S_Check == true && totalTrades <= 0)
          ShortEntry = true;
       
       if(LongEntry == true) {
@@ -356,9 +379,9 @@ string GetRsiOpenSignal(double Rsioverbought, double Rsioversold)
 
    //Submit Ema Long and Short Trades
    if (PriorRsi <= Rsioverbought && CurrentRsi > Rsioverbought)
-      return("Long Exit")
+      return("Long Exit");
    else if (PriorRsi >= Rsioversold && CurrentRsi < Rsioversold)
-      return ("Short Exit")   
+      return ("Short Exit");   
    else if(CurrentRsi > Rsioverbought)
       return("Short");
    else if (CurrentRsi < Rsioversold)
